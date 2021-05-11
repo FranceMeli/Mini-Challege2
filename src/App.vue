@@ -46,6 +46,7 @@ export default {
       console.log(a)
       console.log(classi)
       console.log(el)
+
     })
   }
 }
