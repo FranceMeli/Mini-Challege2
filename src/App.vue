@@ -32,15 +32,21 @@ export default {
     let classi = []
     classi[0]= ["Aldo","Giovanni", "Giacomo"]
     classi[1]= ["m","g","h"];
+    let el=0;
+    d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/car-assignments.csv").then(function(data) {
+      for (let i = 0; i < data.length; i++) {
+        el = data[i];
+        console.log(el)
+      }
+    });
 
-    // eslint-disable-next-line no-undef
     d3.tsv("b.txt").then(function(data) {
       console.log(data); // [{"Hello": "world"}, …]
       console.log(pollo)
       console.log(a)
       console.log(classi)
+      console.log(el)
     })
-
   }
 }
 </script>
