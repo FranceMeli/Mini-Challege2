@@ -10,8 +10,6 @@ const d3 = require("d3");
 export default {
   name: 'MC2Vehicles',
   mounted() {
-
-    let a = []
     // set the dimensions and margins of the graph
     var margin = {top: 20, right: 30, bottom: 40, left: 90},
         width = 460 - margin.left - margin.right,
@@ -25,24 +23,30 @@ export default {
         .append("g")
         .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
-
+    let EType = []
+    let ETitle = []
 // Parse the Data
 d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/car-assignments.csv").then(function(data) {
   for (let i = 0; i < data.length; i++) {
-    let el = data[i].CurrentEmploymentType;
-    a.push(el)
+    let type = data[i].CurrentEmploymentType;
+    let title = data[i].CurrentEmploymentTitle;
+    EType.push(type)
+    ETitle.push(title)
   }
-  console.log(a)
-    let map = {};
-    for ( let i =0; i < a.length ; i++ ){
-      map[ a[i] ] = typeof map[ a[i] ]  === 'undefined' ? 1 : ++map[ a[i] ];
+    let EmplType = {};
+    let EmplTitle= {}
+    for ( let i =0; i < EType.length ; i++ ){
+      EmplType[ EType[i] ] = typeof EmplType[ EType[i] ]  === 'undefined' ? 1 : ++EmplType[ EType[i] ];
     }
-    console.log(map);
-  let  A = d3.entries(map);
-  console.log(A)
+  for ( let i =0; i < ETitle.length ; i++ ){
+    EmplTitle[ ETitle[i] ] = typeof EmplTitle[ ETitle[i] ]  === 'undefined' ? 1 : ++EmplTitle[ ETitle[i] ];
+  }
+
+  let  A = d3.entries(EmplType);
+  //let B =d3.entries(EmplTitle)
   // Add X axis
       var x = d3.scaleLinear()
-          .domain([0, 20])
+          .domain([0, width/10])
           .range([ 0, width]);
       svg.append("g")
           .attr("transform", "translate(0," + height + ")")
@@ -60,23 +64,40 @@ d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/mas
           .call(d3.axisLeft(y))
 
       //Bars
-      svg.selectAll("myRect")
+     const b = svg
+          .selectAll("myRect")
           .data(A)
           .enter()
           .append("rect")
+        //  .text(function(d) { return d.value; })
           .attr("x", x(0) )
           .attr("y", function(d) { return y(d.key); })
-          .attr("width", function(d) {return d.value;})
+          .attr("width", function(d) {return 10*d.value;})
           .attr("height", y.bandwidth() )
           .attr("fill", "#69b3a2")
+     b
+      .append("text")
+      .attr("fill", "#69b3a2")
+      .attr("x", 0)
+      .attr("y", 50)
+      .attr("height", y.bandwidth() )
+      .attr("dy", "0.35em")
+      .text(function(d) { return d.value});
 
-
-      // .attr("x", function(d) { return x(d.key); })
-      // .attr("y", function(d) { return y(d.value); })
+      // .attr("x", function(d) { return x(d.value); })
+      // .attr("y", function(d) { return y(d.key); })
       // .attr("width", x.bandwidth())
-      // .attr("height", function(d) { return height - y(d.Value); })
+      // .attr("height", function(d) { return height - y(d.value); })
       // .attr("fill", "#69b3a2")
 
+    })
+    let prova=[]
+    d3.csv("https://raw.githubusercontent.com/FranceMeli/Mini-Challege2/master/static/gps.csv").then(function(data) {
+      for (let i = 0; i < data.length; i++) {
+        let type = data[i].id;
+        prova.push(type)
+      }
+      console.log(prova)
     })
   }
 }
