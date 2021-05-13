@@ -7,6 +7,7 @@
 
 <script>
  const d3 = require("d3");
+ const topojson = require("topojson")
 //const d3 = require("https://d3js.org/d3.v5.min.js")
 // const topojson = require("topojson")
 export default {
@@ -24,15 +25,16 @@ export default {
 
 
 
-    d3.json("https://raw.githubusercontent.com/FranceMeli/Mini-Challege2/master/static/Geospatial/Abila1.geojson").then(function(mapData) {
-
-      var features = mapData.features;
+    d3.json("https://raw.githubusercontent.com/FranceMeli/Mini-Challege2/master/static/Geospatial/AbilaT.json").then(function(mapData) {
+      var features = topojson.feature(mapData, mapData.objects.Abila1);
+   //   var features = mapData.features;
       console.log(features)
-      var projection = d3.geoIdentity()
-          .fitExtent([[50,50],[600-50,300-50]], features)
-      let geop = d3.geoPath(projection)
+      /*var projection = d3.geoIdentity()
+          .fitExtent([[50,50],[600-50,300-50]], features)*/
+      let geop = d3.geoPath(null)
+      console.log(geop)
       svg.append("g")
-          .attr("class", "states")
+          .attr("class", "Abila1")
           .selectAll("path")
           .data(mapData.features)
           .enter().append("path")
