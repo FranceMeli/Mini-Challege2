@@ -6,42 +6,45 @@
 </template>
 
 <script>
-const d3 = require("d3");
+ const d3 = require("d3");
+//const d3 = require("https://d3js.org/d3.v5.min.js")
+// const topojson = require("topojson")
 export default {
   name: 'MC2Card',
   mounted() {
-   /* d3.json("https://raw.githubusercontent.com/FranceMeli/Mini-Challege2/master/static/Geospatial/Abila.json").then(function(data){ console.log(data)});
-*/
- /*   var width = 1100;
-    var height = 800;
 
-    var svg = d3.select("#Map")
+
+    var width = 600,
+        height = 300;
+
+    var svg = d3.select('#Map')
         .append("svg")
-        .attr("width",width)  // apply width,height to svg
-        .attr("height",height);
+        .attr('width', width)
+        .attr('height', height);
 
 
 
-    d3.json("https://raw.githubusercontent.com/FranceMeli/Mini-Challege2/master/static/Geospatial/Abila.json", function(err, geojson) {
-    console.log("AAA")
-      var projection = d3.geoMercator();
-      var path = d3.geoPath().projection(projection);
-      projection.fitSize([width,height],geojson); // adjust the projection to the features
-      svg.append("path").attr("d", path(geojson)); // draw the features
+    d3.json("https://raw.githubusercontent.com/FranceMeli/Mini-Challege2/master/static/Geospatial/Abila1.geojson").then(function(mapData) {
 
-    })*/
-    var w = 500;
-    var h = 300;
-
-    //Define path generator
-   let  projection = d3.geoMercator()
-    var path = d3.geo.path(projection);
+      var features = mapData.features;
+      console.log(features)
+      var projection = d3.geoIdentity()
+          .fitExtent([[50,50],[600-50,300-50]], features)
+      let geop = d3.geoPath(projection)
+      svg.append("g")
+          .attr("class", "states")
+          .selectAll("path")
+          .data(mapData.features)
+          .enter().append("path")
+          .attr("fill", "gray")
+          .attr("d", geop);
+    });
 
     //Create SVG element
-    var svg = d3.select("#Map").append("svg").attr({width:w, height: h});
+   /* var svg = d3.select("#Map").append("svg").attr({width:w, height: h});
 
     //Load in GeoJSON data
-    d3.json("https://raw.githubusercontent.com/FranceMeli/Mini-Challege2/master/static/Geospatial/Abila.json", function(json) {
+    d3.json("https://raw.githubusercontent.com/FranceMeli/Mini-Challege2/master/static/Geospatial/Abila1.json", function(json) {
       console.log("A")
       //Bind data and create one path per GeoJSON feature
       svg.selectAll("path")
@@ -51,7 +54,7 @@ export default {
           .attr("d", path)
           .attr("fill","#666666");
 
-    });
+    });*/
 
 //Note that when you bind new data, you will be changing existing path elements
 //So you would also need to do a exit and modify existing paths
