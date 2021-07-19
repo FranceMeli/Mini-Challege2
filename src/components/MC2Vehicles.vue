@@ -1,162 +1,342 @@
 <template>
-  <div class="hello">
+  <div class="mc2Vehicles">
     <h1>MC2Vehicles</h1>
-    <div id="EmplType"></div>
-    <div id="EmplTitle"></div>
-    <div id="movement"></div>
+    <b-row>
+      <b-col>
+        <div id="Map"></div>
+        <div id="sliderOre">
+          <input id="timeOre" type="range" min="0" max="86400" value="0" step="1"/><br> <!-- max 86400-->
+          <span id="rangeOre">00.00.00</span>
+        </div>
+        <div id="sliderGiorni">
+          <input id="timeGiorni" type="range" min="0" max="13" value="0" step="1"/><br>
+          <span id="rangeGiorni">01/06/2014</span>
+        </div>
+      </b-col>
+      <b-col>
+        <h2>Persons</h2>
+        <b-list-group class="personList">
+          <b-list-group-item v-for="p in persons" :key="p.id"
+                             :variant="p.selected ? 'warning': ''"
+                             class="d-flex justify-content-between align-items-center">
+            <b-badge variant="primary" pill>{{p.id}}</b-badge>
+            {{p.person}}
+          </b-list-group-item>
+        </b-list-group>
+      </b-col>
+    </b-row>
+
   </div>
 </template>
 
 <script>
 const d3 = require("d3");
+//const topojson = require("topojson")
+//const d3 = require("https://d3js.org/d3.v5.min.js")
+const topojson = require("topojson")
 export default {
   name: 'MC2Vehicles',
-  mounted() {
-    // set the dimensions and margins of the graph
-    var margin = {top: 20, right: 30, bottom: 40, left: 90},
-        width = 460 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-    var svg = d3.select("#EmplType")
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
-    let EType = []
-    let ETitle = []
-// Parse the Data
-d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/car-assignments.csv").then(function(data) {
-  for (let i = 0; i < data.length; i++) {
-    let type = data[i].CurrentEmploymentType;
-    let title = data[i].CurrentEmploymentTitle;
-    EType.push(type)
-    ETitle.push(title)
-  }
-    let EmplType = {};
-    let EmplTitle= {}
-    for ( let i =0; i < EType.length ; i++ ){
-      EmplType[ EType[i] ] = typeof EmplType[ EType[i] ]  === 'undefined' ? 1 : ++EmplType[ EType[i] ];
+  data() {
+    return {
+      persons: []
+    };
+  },
+  mounted: function () {
+    d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/car-assignments.csv")
+        .then((rows) => {
+          const ids = rows
+              .filter((row) => {
+                const entries = d3.values(row);
+                return (entries[2].length > 0); // ignore rows with invalid id (not numeric)
+              })
+              .map((row) => {
+                const entries = d3.values(row);
+                return {
+                  id: entries[2],
+                  person: entries[1] + " " +  entries[0],
+                };
+              });
+          this.persons = ids;
+        });
+    var width = 900;
+    var height = 600;
+    var inputGiorno = null;
+    var inputOra = null;
+    const Giorni = ["01/06/2014","01/07/2014", "01/08/2014", "01/09/2014","01/10/2014","01/11/2014","01/12/2014","01/13/2014","01/14/2014",
+      "01/15/2014","01/16/2014","01/17/2014","01/18/2014","01/19/2014"];
+    const StringOre=[];
+    for (let i=0;i<=86400;i=i+1){
+      StringOre.push(i)
     }
-  for ( let i =0; i < ETitle.length ; i++ ){
-    EmplTitle[ ETitle[i] ] = typeof EmplTitle[ ETitle[i] ]  === 'undefined' ? 1 : ++EmplTitle[ ETitle[i] ];
-  }
-
-  let  A = d3.entries(EmplType);
-  //let B =d3.entries(EmplTitle)
-  // Add X axis
-      var x = d3.scaleLinear()
-          .domain([0, width/10])
-          .range([ 0, width]);
-      svg.append("g")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(x))
-          .selectAll("text")
-          .attr("transform", "translate(-10,0)rotate(-45)")
-          .style("text-anchor", "end");
-
-      // Y axis
-      var y = d3.scaleBand()
-          .range([ 0, height ])
-          .domain(A.map(function(d) { return d.key; }))
-          .padding(.1);
-      svg.append("g")
-          .call(d3.axisLeft(y))
-
-      //Bars
-     const b = svg
-          .selectAll("myRect")
-          .data(A)
-          .enter()
-          .append("rect")
-        //  .text(function(d) { return d.value; })
-          .attr("x", x(0) )
-          .attr("y", function(d) { return y(d.key); })
-          .attr("width", function(d) {return 10*d.value;})
-          .attr("height", y.bandwidth() )
-          .attr("fill", "#69b3a2")
-     b
-      .append("text")
-      .attr("fill", "#69b3a2")
-      .attr("x", 0)
-      .attr("y", 50)
-      .attr("height", y.bandwidth() )
-      .attr("dy", "0.35em")
-      .text(function(d) { return d.value});
-
-      // .attr("x", function(d) { return x(d.value); })
-      // .attr("y", function(d) { return y(d.key); })
-      // .attr("width", x.bandwidth())
-      // .attr("height", function(d) { return height - y(d.value); })
-      // .attr("fill", "#69b3a2")
-
-    })
-    let mov = d3.select("#movement")
+    let features;
+    const riprova = [];
+    let projection = d3.geoMercator()
+        .scale(460000)
+        .center([24.8669975, 36.0699665])
+    //  .fitSize([width - 30, height - 30]);
+    d3.json("https://raw.githubusercontent.com/FranceMeli/Mini-Challege2/master/static/Geospatial/AbilaT.json")
+        .then(function (mapData) {
+          features = topojson.feature(mapData, mapData.objects.Abila1);
+          createMap(features)
+        });
+    var svg = d3.select('#Map')
         .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
-    let B=[]
-    d3.csv("https://raw.githubusercontent.com/FranceMeli/Mini-Challege2/master/static/gps.csv").then(function(data) {
-      for (let i = 0; i < data.length; i++) {
-        let type = data[i].id;
-        B.push(type)
-      }
-      let Move = {};
-      for ( let i =0; i < B.length ; i++ ){
-        Move[ B[i] ] = typeof Move[ B[i] ]  === 'undefined' ? 1 : ++Move[ B[i] ];
-      }
-      let C =d3.entries(Move)
-
-      var x = d3.scaleLinear()
-          .domain([0, width*100])
-          .range([ 0, width]);
-      mov.append("g")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(x))
-          .selectAll("text")
-          .attr("transform", "translate(-10,0)rotate(-45)")
-          .style("text-anchor", "end");
-
-      // Y axis
-      var y = d3.scaleBand()
-          .range([ 0, height ])
-          .domain(C.map(function(d) { return d.key; }))
-          .padding(.1);
-      mov.append("g")
-          .call(d3.axisLeft(y))
-
-      //Bars
-      const b = mov
-          .selectAll("myRect")
-          .data(C)
+        .attr('width', width)
+        .attr('height', height);
+    //  var person = d3.select(".list-group personList")
+    function createMap(features) {
+      var geoPath = d3.geoPath().projection(projection);
+      /* var bounds = d3.geoBounds(features);
+        var centerX = d3.sum(bounds, function(d) {return d[0];}) / 2;
+        var centerY = d3.sum(bounds, function(d) {return d[1];}) / 2;*/
+      svg.selectAll("path").data(features.features)
           .enter()
-          .append("rect")
-          //  .text(function(d) { return d.value; })
-          .attr("x", x(0) )
-          .attr("y", function(d) { return y(d.key); })
-          .attr("width", function(d) {return d.value/100;})
-          .attr("height", y.bandwidth() )
-          .attr("fill", "#69b3a2")
-      b
-          .append("text")
-          .attr("fill", "#69b3a2")
-          .attr("x", 0)
-          .attr("y", 50)
-          .attr("height", y.bandwidth() )
-          .attr("dy", "0.35em")
-          .text(function(d) { return d.value});
-    })
+          .append("path")
+          .attr("d", geoPath)
+    }
+    //   });
+
+    function createTraj(gps){
+      svg
+          .selectAll("circle")
+          .data(gps.map(function(d) { return d.values}))
+          //gps.map(function(d) { return d.values; }))
+          .enter()
+          .append("circle")
+          .attr("class", "move")
+          .attr("r", 3)
+          .attr("cx", initialCoordinateX)
+          .attr("cy", initialCoordinateY)
+          .attr("fill", initialDate)
+    }
+
+    function dateMatch(d) {
+      let B = d3.nest()
+          .key( function(d){
+            if( d.Timestamp == inputGiorno){
+              return d.Timestamp
+            }
+          }).sortKeys(d3.ascending)
+          .entries(d);
+      if (B[0].key == inputGiorno) {
+        //    this.parentElement.appendChild(this);
+        return "red";
+      } else {
+        return "#00FFFFFF";
+      }
+    }
+    function initialDate(d) {
+
+      var day = d.map(function (d) {
+        return d.Timestamp;
+      })
+      /*  for (let i = 0; i < B.length; i++) {
+          if (!Giorni.includes(B[i].Timestamp)) {
+            Giorni.push(B[i].Timestamp)
+          }*/
+      //   var time = d.map(function(d) { return d.Time; })
+      if (day[0] == "01/06/2014") {
+        this.parentElement.appendChild(this);
+        return "red";
+      } else {
+        return "#999";
+      }
+    }
+    function initialCoordinateX(d){
+      var day = d.map(function(d) { return d.Timestamp; })
+      if (day[0] == "01/06/2014") {
+        //    this.parentElement.appendChild(this);
+        var long = d.map(function(d) { return d.long; })
+        var lat = d.map(function(d) { return d.lat; })
+        return projection([long[0],lat[0]])[0];
+      } else {
+        return
+      }
+    }
+    function initialCoordinateY(d){
+      var day = d.map(function(d) { return d.Timestamp; })
+      if (day[0] == "01/06/2014") {
+        //    this.parentElement.appendChild(this);
+        var long = d.map(function(d) { return d.long; })
+        var lat = d.map(function(d) { return d.lat; })
+        return projection([long[0],lat[0]])[1];
+      } else {
+        return
+      }
+    }
+
+    function Cx(d) {
+      let B = d3.nest()
+          .key(d => d.Timestamp)
+          .entries(d);
+      for (let i = 0; i < B.length; i++) {
+        if (B[i].key == inputGiorno) {
+          //  this.parentElement.appendChild(this);
+          var long = B[i].values[0].long
+          var lat = B[i].values[0].lat
+          return projection([long, lat])[0];
+        }
+      }
+    }
+    function Cy(d) {
+      /*  var day = d.map(function(d) { return d.Timestamp; })
+      if (inputGiorno == day[0]) {*/
+      let B = d3.nest()
+          .key(d => d.Timestamp)
+          .entries(d);
+      for (let i = 0; i < B.length; i++) {
+        if (B[i].key == inputGiorno) {
+          //    this.parentElement.appendChild(this);
+          var long = B[i].values[0].long
+          var lat = B[i].values[0].lat
+          return projection([long,lat])[1];
+          /* var long = d.map(function (d) {return d.long;})
+           var lat = d.map(function (d) {return d.lat;
+           })
+           return projection([long[0], lat[0]])[1];*/
+        }
+      }
+    }
+
+    d3.select("#timeGiorni").on("input", function () {
+      updateGG(+this.value);
+    });
+    d3.select("#timeOre").on("input", function () {
+      updateOre(+this.value);
+    });
+// update the fill of each SVG
+    function updateGG(value){
+      document.getElementById("rangeGiorni").innerHTML = Giorni[value];
+      inputGiorno = Giorni[value];
+      var g = inputGiorno.replace("/", "-")// d3.select("#timeGiorni"
+      var giorno = g.replace("/", "-")
+      console.log(giorno)
+      d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/" + giorno + ".csv")
+          .then((rows) => {
+            const ids = rows
+                .map((row) => {
+                  const entries = d3.values(row)
+                  return {
+                    Timestamp: entries["0"],
+                    id: entries["1"],
+                    lat: entries["2"],
+                    long: entries["3"],
+                    times: entries["0"],
+                  };
+                });
+            let dataset = [];
+            dataset = ids;
+            for (let i = 0; i < dataset.length; i = i + 50) {
+              let secondi = trasformaOra(dataset[i].Timestamp.slice(11,));
+              dataset[i].times = secondi
+              dataset[i]["Timestamp"] = dataset[i].Timestamp.slice(0, 10)
+
+              if (dataset[i].Timestamp == "01/06/2014") { //|| dataset[i].Timestamp == "01/07/2014"|| dataset[i].Timestamp == "01/08/2014") { //|| dataset[i].Timestamp.slice(0, 10) == "01/08/2014") {
+                riprova.push(dataset[i])
+              }
+            }
+            /*  if (!StringOre.includes(dataset[i].times)) {
+              StringOre.push(dataset[i].times);
+            }*/
+            const trajs = d3.nest()
+                .key(d => d.id)
+                .entries(riprova);
+            createTraj(trajs)
+          });
+      d3.selectAll(".move")
+          .attr("fill", dateMatch)
+          .attr("cx", Cx)
+          .attr("cy", Cy)
+    }
+    function updateOre(value){
+      let G= document.getElementById("rangeGiorni").innerHTML
+      document.getElementById("rangeOre").innerHTML = StringOre[value];
+      inputGiorno=G
+      inputOra = StringOre[value]
+      d3.selectAll(".move")
+          .attr("fill", dateMatch)
+          .attr("cx", CxTime)
+          .attr("cy", CyTime)
+    }
+    function CxTime(d) {
+      let Si=false
+      let B = d3.nest()
+          .key(function (d) {
+            if (d.Timestamp == inputGiorno) {
+              return d.Timestamp
+            }
+          }).sortKeys(d3.ascending)
+          .entries(d);
+      if (B[0].key == inputGiorno) {
+        let lo = B[0].values.map(function (d) {
+          //  this.parentElement.appendChild(this);
+          if (d.times == inputOra) {
+            Si = true;
+            let long = d.long
+            return long
+          }
+        })
+        let la = B[0].values
+            .map(function (d) {
+              //  this.parentElement.appendChild(this);
+              if (d.times == inputOra) {
+                Si = true;
+                let lat = d.lat
+                return lat
+              }
+            })
+        la.sort(d3.ascending)
+        lo.sort(d3.ascending)
+        if (Si) {
+          return projection([lo[0], la[0]])[0];
+        }
+      }}
+    function CyTime(d) {
+      let Si = false
+      let B = d3.nest()
+          .key(function (d) {
+            if (d.Timestamp == inputGiorno) {
+              return d.Timestamp
+            }
+          }).sortKeys(d3.ascending)
+          .entries(d);
+      if (B[0].key == inputGiorno) {
+        let lo = B[0].values.map(function (d) {
+          //  this.parentElement.appendChild(this);
+          if (d.times == inputOra) {
+            Si = true;
+            let long = d.long
+            return long
+          }
+        })
+        let la = B[0].values.map(function (d) {
+          //  this.parentElement.appendChild(this);
+          if (d.times == inputOra) {
+            Si = true;
+            let lat = d.lat
+            return lat
+          }
+        })
+        la.sort(d3.ascending)
+        lo.sort(d3.ascending)
+        if (Si) {
+          return projection([lo[0], la[0]])[1];
+        }
+      }
+    }
+    function trasformaOra(ora){
+      let  Hh = ora.slice(0,2)*3600;
+      let  Mm = ora.slice(3,5)*60;
+      let  Ss = ora.slice(6,8)*1;
+      let totSecondi=Hh+Mm+Ss
+      return totSecondi;
+    }
+
   }
-}
-</script>
+}</script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style>
 h3 {
   margin: 40px 0 0;
 }
@@ -168,5 +348,21 @@ li {
   display: inline-block;
   margin: 0 10px;
 }
+a {
+  fill: #ccc;
+  stroke: #fff;
+  stroke-width: .5px;
+}
 
+path {
+  stroke-width: 1;
+  stroke: black;
+  opacity: .5;
+}
+.personList{
+  height: 600px;
+  overflow: scroll;
+  overflow-style: marquee-block ;
+  text-align: center;
+}
 </style>

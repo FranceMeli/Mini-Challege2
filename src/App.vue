@@ -13,35 +13,35 @@
         </b-navbar-nav>
       </b-collapse>
    </b-navbar>
-  <!--  <MC2Vehicles></MC2Vehicles>-->
-    <MC2Card></MC2Card>
-  </div>
-</template>
+   <MC2Vehicles></MC2Vehicles>
+    <!-- <MC2Card></MC2Card> -->
+    </div>
+  </template>
 
-<script>
-//import MC2Vehicles from './components/MC2Vehicles.vue'
-import MC2Card from './components/MC2Card.vue'
-//const d3 = require("d3");
-export default {
-  name: 'App',
-  components: {
-    MC2Card,
- //   MC2Vehicles
-  },
-  mounted() {
+  <script>
+  import MC2Vehicles from './components/MC2Vehicles.vue'
+  //import MC2Card from './components/MC2Card.vue'
+  //const d3 = require("d3");
+  export default {
+    name: 'App',
+    components: {
+    // MC2Card,
+      MC2Vehicles
+    },
+    mounted() {
+
+    }
 
   }
+  </script>
 
-}
-</script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  /*color: #2c3e50;*/
-  margin-top: 60px;
-}
-</style>
+  <style>
+  #app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    /*color: #2c3e50;*/
+    margin-top: 60px;
+  }
+  </style>
