@@ -211,7 +211,7 @@ export default {
       var g = inputGiorno.replace("/", "-")// d3.select("#timeGiorni"
       var giorno = g.replace("/", "-")
       console.log(giorno)
-      d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/" + giorno + ".csv")
+      d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/GpsForDate/" + giorno + ".csv")
           .then((rows) => {
             const ids = rows
                 .map((row) => {
