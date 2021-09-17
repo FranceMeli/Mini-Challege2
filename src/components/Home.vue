@@ -1,20 +1,11 @@
 <template>
-  <div id="app">
-    <h1>VC 2008</h1>
-    <h2>Mini-Challenge 2</h2>
-    <b-navbar toggleable="lg" type="dark" variant="info">
-      <!--  <b-navbar-brand href="#">VC 2008</b-navbar-brand>-->
-      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
-      <b-collapse id="nav-collapse" is-nav >
-        <b-navbar-nav>
-          <b-nav-item href="#" @click="selezionato='Home'">Home</b-nav-item>
-     <!-- <b-nav-item href="#" @click="CambiaPagina(">General Results</b-nav-item> -->
-          <b-nav-item href="#" @click="selezionato='Vehicles'">Vehicles</b-nav-item>
-          <b-nav-item href="#" @click="selezionato='Card'">Credit-Cards</b-nav-item>
-        </b-navbar-nav>
-      </b-collapse>
-   </b-navbar>
-   <component :is="selezionato"></component>
+  <div id="Home">
+    <div id="h">
+      <h1>Spiegazione del progetto</h1>
+      <p>Intuizioni, lavoro sui dati e pagine veicoli e card</p>
+      <div id="EmplType">Suddivisioni dei ruoli dei dipendenti dell'azienda</div>
+      <div id="EmplTitle"></div>
+    </div>
 <!--   <MC2Vehicles id="v"></MC2Vehicles>
     <MC2Card id="c"></MC2Card>-->
     </div>
@@ -22,22 +13,9 @@
 
   <script>
   const d3 = require("d3");
-  import MC2Vehicles from './components/MC2Vehicles.vue'
-  import MC2Card from "@/components/MC2Card";
-  import Home from "@/components/Home";
-  //import MC2Card from './components/MC2Card.vue'
+
   export default {
-    name: 'App',
-    data() {
-return {
-      selezionato: 'Home'
-    };
-},
-    components: {
-     'Card': MC2Card,
-     'Vehicles': MC2Vehicles,
-      'Home': Home
-    },
+    name: 'Home',
     methods: {
     },
     mounted: function () {

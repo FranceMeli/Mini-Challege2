@@ -1,11 +1,17 @@
 <template>
   <div class="hello">
     <h1>MC2Card</h1>
-    <div id="EmplType"></div>
-    <div id="EmplTitle"></div>
-    <button v-on:click="update('var1')">Variable 1</button>
-    <button v-on:click="update('var2')">Variable 2</button>
-    <div id="movement"></div>
+    <div id="spese">
+      <p>Spese con Credit Card e Loyalty Card</p>
+      <button id="var1">Credit Card</button>
+      <button id="var2">Loyalty Card</button>
+      <div id="movement"></div>
+    </div>
+    <div id="appunti">
+      <p>Dipendenti con spese oltre i 100$, in rosso i possibili outliers</p>
+    </div>
+    <div id="luogo"></div>
+    <div id="patterns"></div>
   </div>
 </template>
 
@@ -13,529 +19,518 @@
 const d3 = require("d3");
 export default {
   name: 'MC2Card',
-  methods: {
-      update: function (selectedVar) {
-        var margin1 = {top: 10, right: 30, bottom: 20, left: 50},
-            width1 = 460 - margin1.left - margin1.right,
-            height1 = 400 - margin1.top - margin1.bottom;
-// append the svg object to the body of the page
-        var svg1 = d3.select("#movement")
-            .append("svg")
-            .attr("width", width1 + margin1.left + margin1.right)
-            .attr("height", height1 + margin1.top + margin1.bottom)
-            .append("g")
-            .attr("transform",
-                "translate(" + margin1.left + "," + margin1.top + ")");
-        var x = d3.scaleBand()
-            .range([ 0, width1 ])
-            .padding(0.2);
-        var xAxis = svg1.append("g")
-            .attr("transform", "translate(0," + height1 + ")")
-
-// Initialize the Y axis
-        var y = d3.scaleLinear()
-            .range([ height1, 0]);
-        var yAxis = svg1.append("g")
-            .attr("class", "myYaxis")
-    let Data=[];
-    if (selectedVar == 'var1') {
-      // Parse the Data
-      d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/cc_data.csv")
-          .then((rows) => {
-            const ids = rows
-                .map((row) => {
-                  const entries = d3.values(row)
-                  return {
-                    Timestamp: entries["0"],
-                    Luogo: entries["1"],
-                    Prezzo: entries["2"],
-                    Nome: entries["3"],
-                    Cognome: entries["4"],
-                  };
-                });
-            let dataset;
-            dataset = ids;
-            let data = [];
-            for (let i = 0; i < dataset.length; i = i + 20) {
-              data.push(dataset[i])
-            }
-          let data1 = data;
-          })
-       data2 = data1;
-    }
-          else if (selectedVar == 'var2') {
-        // Parse the Data
-      d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/loyalty_data.csv")
-            .then((rows) => {
-              const ids = rows
-                  .map((row) => {
-                    const entries = d3.values(row)
-                    return {
-                      Timestamp: entries["0"].slice(0, 8),
-                      Luogo: entries["1"],
-                      Prezzo: entries["2"],
-                      Nome: entries["3"],
-                      Cognome: entries["4"],
-                    };
-                  });
-              let dataset = [];
-              dataset = ids;
-              let data = [];
-              for (let i = 0; i < dataset.length; i = i + 20) {
-                data.push(dataset[i])
-              }
-            })
-      }
-        console.log(data)
-        for (let i = 0; i < Data.length; i++) {
-          console.log(Data[i])
-        }
-            x.domain(d3.entries(Data).map(function (d) {
-              return d.Cognome;
-            }))
-            xAxis.transition().duration(1000).call(d3.axisBottom(x))
-
-            // Add Y axis
-            y.domain([0, 400]);
-            yAxis.transition().duration(1000).call(d3.axisLeft(y));
-
-            // variable u: map data to existing bars
-            var u = svg1.selectAll("rect")
-                .data(Data)
-            // update bars
-            u
-                .enter()
-                .append("rect")
-                .merge(u)
-                .transition()
-                .duration(1000)
-                .attr("x", function (d) {
-                  return x(d.Cognome);
-                })
-                .attr("y", function (d) {
-                  return y(d.Prezzo);
-                })
-                .attr("width", x.bandwidth())
-                .attr("height", function (d) {
-                  return height1 - y(d.Prezzo);
-                })
-                .attr("fill", "#69b3a2")
-
-    }
-// Initialize plot
-  },
+  // Initialize plot
   mounted() {
-    //Grafico 1
-/*    var width = 450
-   var height = 450
-    var margin = 40
-    var radius = Math.min(width, height) / 2 - margin
-    var svg = d3.select("#EmplType")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g")
-        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-    d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/car-assignments.csv")
-      .then((rows) => {
-        const ids = rows
-            .map((row) => {
-              const entries = d3.values(row)
-              return {
-                Cognome: entries["0"],
-                Nome: entries["1"],
-                Id: entries["2"],
-                LavoroCorrente: entries["3"],
-                TipoLavoro: entries["4"],
-              };
-            });
-        let dataset = [];
-        dataset = ids;
-        const da = d3.nest()
-            .key(function (d) {
-              return d.LavoroCorrente;
-            })
-            .rollup(function (v) {
-              return v.length;
-            })
-            .entries(dataset);
-        var pie = d3.pie()
-            .value(function (d) {
-              return d.value.value;
-            })
-        var data_ready = pie(d3.entries(da))
-     //   console.log(data_ready[0].data.value)
-// Now I know that group A goes from 0 degrees to x degrees and so on.
-        var color = d3.scaleOrdinal()
-            .domain(data_ready)
-            .range(d3.schemeSet2);
-// shape helper to build arcs:
-        var arcGenerator = d3.arc()
-            .innerRadius(0)
-            .outerRadius(radius)
-
-// Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-        svg
-            .selectAll('mySlices')
-            .data(data_ready)
-            .enter()
-            .append('path')
-            .attr('d', arcGenerator)
-            .attr('fill', function (d) {
-              return (color(d.data.key))
-            })
-            .attr("stroke", "black")
-            .style("stroke-width", "2px")
-            .style("opacity", 0.7)
-
-// Now add the annotation. Use the centroid method to get the best coordinates
-        svg
-            .selectAll('mySlices')
-            .data(data_ready)
-            .enter()
-            .append('text')
-            .text(function (d) {
-              var p = d.data.value.value
-              return d.data.value.key + " " + Math.floor((p * 100) / 60) + "" + "%"
-            })
-            .attr("transform", function (d) {
-              return "translate(" + arcGenerator.centroid(d) + ")";
-            })
-            .style("text-anchor", "middle")
-            .style("font-size", 14)
-      });*/
-   /// Prova altro dataset Grafico 2
-  /*  var margin1 = {top: 10, right: 30, bottom: 20, left: 50},
-        width1 = 460 - margin1.left - margin1.right,
-        height1 = 400 - margin1.top - margin1.bottom;
+      var margin1 = {top: 30, right: 30, bottom: 20, left: 120},
+          width1 = 600,
+          height1 = 530;
 // append the svg object to the body of the page
-
-    var svg1 = d3.select("#movement")
+      var svg1 = d3.select("#movement")
+          .append("svg")
+          .attr("width", width1 + margin1.left + margin1.right)
+          .attr("height", height1 + margin1.top + margin1.bottom)
+          .append("g")
+          .attr("transform",
+              "translate(" + margin1.left + "," + margin1.top + ")");
+    var svg2 = d3.select("#luogo")
         .append("svg")
         .attr("width", width1 + margin1.left + margin1.right)
         .attr("height", height1 + margin1.top + margin1.bottom)
         .append("g")
         .attr("transform",
             "translate(" + margin1.left + "," + margin1.top + ")");
-// Parse the Data
-    d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/cc_data.csv")
-        .then((rows) => {
-          const ids = rows
-              .map((row) => {
-                const entries = d3.values(row)
-                return {
-                  Timestamp: entries["0"].slice(0,8),
-                  Luogo: entries["1"],
-                  Prezzo: entries["2"],
-                //  Nome: entries["3"],
-                //  Cognome: entries["4"],
-                };
-              });
-          let dataset = [];
-          dataset=ids;
-          let data=[];
-          for (let i = 0; i < dataset.length; i=i+20) {
-            data.push(dataset[i])
-            }
-          var groups = d3.map(data, function(d){return(d.Timestamp)})
-      // List of subgroups = header of the csv files = soil condition here
-      var subgroups = d3.map(data, function(d){return(d.Luogo)})
-          let subg = [];
-          for (let i = 0; i < subgroups.length; i++) {
-            if( !subg.includes(subgroups[i]))
-                subg.push(subgroups[i])
-          }
-
-      // List of groups = species here = value of the first column called group -> I show them on the X axis
-
-      // Add X axis
-      var x = d3.scaleBand()
-          .domain(groups)
+    var svg3 = d3.select("#patterns")
+        .append("svg")
+        .attr("width", width1 + margin1.left + margin1.right)
+        .attr("height", height1 + margin1.top + margin1.bottom)
+        .append("g")
+        .attr("transform",
+            "translate(" + margin1.left + "," + margin1.top + ")");
+      var x = d3.scaleLinear()
           .range([0, width1])
-          .padding([0.2])
-      svg1.append("g")
+      //  .padding(0.2);
+      var xAxis = svg1.append("g")
           .attr("transform", "translate(0," + height1 + ")")
-          .call(d3.axisBottom(x).tickSizeOuter(10));
+// Initialize the Y axis
+      var y = d3.scaleBand()
+          .range([0, height1])
+      //   .padding(0.2);
+      var yAxis = svg1.append("g")
+          //  .attr("transform", "translate(0," + height1 + ")")
+          .attr("class", "myYaxis")
+    var x1 = d3.scaleLinear()
+        .range([0, width1])
+    //  .padding(0.2);
+    var xAxis1 = svg2.append("g")
+        .attr("transform", "translate(0," + height1 + ")")
+// Initialize the Y axis
+    var y1 = d3.scaleBand()
+        .range([0, height1])
+    //   .padding(0.2);
+    var yAxis1 = svg2.append("g")
+        //  .attr("transform", "translate(0," + height1 + ")")
+        .attr("class", "myYaxis1")
+    var x2 = d3.scaleBand()
+        .range([0, width1])
+    //  .padding(0.2);
+    var xAxis2 = svg3.append("g")
+        .attr("transform", "translate(0," + height1 + ")")
+// Initialize the Y axis
+    var y2 = d3.scaleLinear()
+        .range([height1, 0])
+    //   .padding(0.2);
+    var yAxis2 = svg3.append("g")
+        //  .attr("transform", "translate(0," + height1 + ")")
+        .attr("class", "myYaxis2")
+      var table = d3.select('#appunti')
+          .append('table')
+          .attr("id", "table")
+      //  var thead = table.append('thead')
+      var tbody = table.append('tbody');
+      update("var1")
+      d3.select("#var1").on("click", function () {
+        update("var1")
+      });
+      d3.select("#var2").on("click", function () {
+        update("var2")
+      });
 
-      // Add Y axis
-      var y = d3.scaleLinear()
-          .domain([0, 120])
-          .range([ height1, 0 ]);
-      svg1.append("g")
-          .call(d3.axisLeft(y));
-
-      // color palette = one color per subgroup
-      var color = d3.scaleOrdinal()
-          .domain(subg)
-          .range(d3.schemeSet2);
-
-      //stack the data? --> stack per subgroup
-
-
-          var e = d3.nest()
-              .key(function(d) { return d.Timestamp; })
-              .key(function(d) { return d.Luogo; })
-              .rollup(function(v) { return d3.sum(v, function(d) { return d.Prezzo; }); })
+    d3.select(".tab").on("click", function () {
+      update("var2")
+    });
+      function update(selectedVar) {
+        let persons=[]
+        d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/car-assignments.csv")
+            .then((rows) => {
+              const ids = rows
+                  .map((row) => {
+                    const entries = d3.values(row)
+                    return {
+                      Employer: entries["1"] + " " + entries["0"],
+                    };
+                  });
+              persons = ids
+              persons.sort(function (a,b) {return d3.ascending(a.Employer, b.Employer);});
+            })
+        if (selectedVar === 'var1') {
+          // Parse the Data
+          d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/cc_data.csv")
+              .then((rows) => {
+                const ids = rows
+                    .map((row) => {
+                      const entries = d3.values(row)
+                      return {
+                        Timestamp: entries["0"],
+                        Luogo: entries["1"],
+                        Prezzo: entries["2"],
+                        Nome: entries["3"] + " " + entries["4"]
+                      };
+                    });
+                let dataset;
+                dataset = ids;
+                provo(dataset);
+                secondo(dataset)
+              })
+        } else if (selectedVar === 'var2') {
+          // Parse the Data
+          d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/loyalty_data.csv")
+              .then((rows) => {
+                const ids = rows
+                    .map((row) => {
+                      const entries = d3.values(row)
+                      return {
+                        Timestamp: entries["0"].slice(0, 8),
+                        Luogo: entries["1"],
+                        Prezzo: entries["2"],
+                        Nome: entries["3"] + " " + entries["4"]
+                      };
+                    });
+                let dataset;
+                dataset = ids;
+                provo(dataset);
+                secondo(dataset)
+              })
+        }
+        function secondo(data) {
+          var dat = d3.nest()
+              .key(function (d) {
+                return d.Luogo;
+              })
+              .sortKeys(d3.ascending)
+              .rollup(function (v) {
+                return {
+                  total: d3.sum(v, function (d) {
+                    return d.Prezzo;
+                  }),
+                };
+              })
               .entries(data);
-          console.log(e);
-       //   console.log(d3.entries(e));
-          let tot1 = []
-          let wrongMap = []
-          for (let i=0; i<e.length; i++){
-              d3.values(e[i].values).map(function (d) {
-                wrongMap["Timestamp"] = e[i].key
-                wrongMap[d.key] = d.value
+          y1.domain(dat.map(function (d) {
+            return d.key;
+          }))
+          //Bars*/
+          x1.domain([0, 4000])
+          xAxis1.transition().duration(1000).call(d3.axisBottom(x1))
+          // Add Y axis
+          yAxis1.transition().duration(1000).call(d3.axisLeft(y1));
+
+          var u = svg2.selectAll("rect")
+              .data(dat)
+
+          u.exit()
+              .transition()
+              .duration(1000)
+              .attr("width", 0)
+              .remove();
+          // update bars
+          u.enter()
+              .append("rect")
+              .merge(u)
+              .transition()
+              .duration(1000)
+              .attr("x", x1(0))
+              .attr("y", function (d) {
+                if (typeof y1(d.key) != 'undefined') {
+                  return y1(d.key);
+                }
+              })
+              .attr("width", function (d) {
+                if (typeof y1(d.key) != 'undefined') {
+                  return x1(d.value.total);
+                }
+              })
+              .attr("height", y1.bandwidth())
+              .attr("fill", RitornaColore)
+
+          var c = svg2.selectAll(".text")
+              .data(dat)
+          c.exit()
+              .transition()
+              .duration(1000)
+              //  .attr("width", 0)
+              .remove();
+
+          c.enter()
+              .append("text")
+              .merge(c)
+              .attr('class', 'text')
+              .style("fill", "black")
+              .style("font-size", "9px")
+              //  .attr("dy", ".35em")
+              .attr("x", function (d) {
+                if (typeof y1(d.key) != 'undefined') {
+                  return x1(d.value.total)+10;
+                }
+              })
+              .attr("y", function (d) {
+                if (typeof y1(d.key) != 'undefined') {
+                  return y1(d.key)+10 ;
+                }
+              })
+              .style("style", "label")
+              .text(function (d) {
+                if (typeof y1(d.key) != 'undefined') {
+                  return d.value.total;
+                }
               });
-            tot1.push(wrongMap)
-            wrongMap=[]
-          }
-          for( let j=0; j<tot1.length; j++) {
-            console.log(tot1[j])
-            if (subg.includes(tot1[j]) == false) {
-              wrongMap[subg[j]] = 0
-              tot1.push(wrongMap[j]);
-              wrongMap = []
+        }
+        function provo(data) {
+          var dat = d3.nest()
+              .key(function (d) {
+                return d.Nome;
+              })
+              .sortKeys(d3.ascending)
+              .rollup(function (v) {
+                return {
+                  total: d3.sum(v, function (d) {
+                    return d.Prezzo;
+                  }),
+                };
+              })
+              .entries(data);
+          y.domain(dat.map(function (d) {
+            return d.key;
+          }))
+          //Bars*/
+          x.domain([0, 4000])
+          xAxis.transition().duration(1000).call(d3.axisBottom(x))
+          // Add Y axis
+          yAxis.transition().duration(1000).call(d3.axisLeft(y));
+
+          var u = svg1.selectAll("rect")
+              .data(dat)
+
+          u.exit()
+              .transition()
+              .duration(1000)
+              .attr("width", 0)
+              .remove();
+          // update bars
+          u.enter()
+              .append("rect")
+              .merge(u)
+              .transition()
+              .duration(1000)
+              .attr("x", x(0))
+              .attr("y", function (d) {
+                if (typeof y(d.key) != 'undefined') {
+                  return y(d.key);
+                }
+              })
+              .attr("width", function (d) {
+                if (typeof y(d.key) != 'undefined') {
+                  return x(d.value.total);
+                }
+              })
+              .attr("height", y.bandwidth())
+              .attr("fill", RitornaColore)
+          var c = svg1.selectAll(".text")
+              .data(dat)
+
+          c.exit()
+              .transition()
+              .duration(1000)
+            //  .attr("width", 0)
+              .remove();
+
+              c.enter()
+               .append("text")
+                  .merge(c)
+                  .attr('class', 'text')
+              .style("fill", "black")
+              .style("font-size", "9px")
+              //  .attr("dy", ".35em")
+              .attr("x", function (d) {
+                if (typeof y(d.key) != 'undefined') {
+                  return x(d.value.total)+10;
+                }
+              })
+              .attr("y", function (d) {
+                if (typeof y(d.key) != 'undefined') {
+                  return y(d.key)+10 ;
+                }
+              })
+              .style("style", "label")
+              .text(function (d) {
+                if (typeof y(d.key) != 'undefined') {
+                  return d.value.total;
+                }
+              });
+
+          tabulate(dat, data, ['Employer con spesa oltre 2000$']); // 2 column table
+      //    patterns(data);
+        }
+        function patterns(dataset,name) {
+          var dat = d3.nest()
+              .key(function (d) {
+                return d.Nome;
+              })
+              .key(function (d) {
+                return d.Luogo;
+              })
+              .rollup(function (v) {
+                return {
+                  total: d3.sum(v, function (d) {
+                    return d.Prezzo;
+                  }),
+                };
+              })
+              .entries(dataset);
+        var domain = []
+          dat.map(function (d) {
+            if (d.key===name){
+              d.values.map(function(d){
+                domain.push(d.key)
+              });
+            }
+          })
+
+          var Employer = []
+          dat.map(function (d) {
+            if (d.key===name){
+              d.values.map(function(d){
+                Employer.push(d)
+              });
+            }
+          })
+          y2.domain([0, d3.max(Employer, function(d) { return d.value.total })])
+          //Bars*/
+          x2.domain(domain)
+          xAxis2.call(d3.axisBottom(x2))
+          // Add Y axis
+          yAxis2.transition().duration(1000).call(d3.axisLeft(y2));
+          //PASSIAMO A u DEI DATI GIà IDENTIFICATIVI DI UN UNICO EMPLOYER
+          var u = svg3.selectAll("rect")
+              .data(Employer)
+
+          u.exit()
+              .transition()
+              .duration(1000)
+             // .attr("width", 0)
+              .remove();
+          // update bars
+          u.enter()
+              .append("rect")
+           //   .merge(u)
+              .transition()
+              .duration(1000)
+              .attr("y", 0)
+              .attr("x", function (d) {
+                      return x2(d.key)
+                  })
+             .attr("width", x2.bandwidth())
+              .attr("height", function (d) {
+            return height1 - d.value.total
+          })
+              .attr("fill", RitornaColore)
+
+          var c = svg3.selectAll(".text")
+              .data(Employer)
+
+          c.exit()
+              .transition()
+              .duration(1000)
+              //  .attr("width", 0)
+              .remove();
+
+          c.enter()
+              .append("text")
+              .merge(c)
+              .attr('class', 'text')
+              .style("fill", "black")
+              .style("font-size", "9px")
+              //  .attr("dy", ".35em")
+              /* .attr("x", function (d) {
+                 if (typeof y2(d.key) != 'undefined') {
+                   return x2(d.value.total)+10;
+                 }
+               })
+               .attr("y", function (d) {
+                 if (typeof y2(d.key) != 'undefined') {
+                   return y2(d.key)+10 ;
+                 }
+               })*/
+              .attr("x", function (d) {
+                    return x2(d.key)
+                })
+              .attr("y", function (d) {
+                    return y2(d.value.total) + 10
+              })
+              .style("style", "label")
+              /*  .text(function (d) {
+                  if (typeof y2(d.key) != 'undefined') {
+                    return d.value.total;
+                  }
+                });*/
+              .text(function (d) {
+                    return y2(d.value.total) -10
+              });
+
+        }
+        function RitornaColore(d) {
+          if (x(d.value.total > 2000)) {
+            return "rgba(255,000,000, 0.3)";
+          } else return "rgba(000,225,000, 0.3)";
+        }
+        function tabulate(data, data1, columns) {
+          let newData = [];
+          for (let i = 0; i < data.length; i++) {
+            if (data[i].value.total > 2000) {
+              newData.push(data[i])
             }
           }
-       //   console.log(tot1)
-     //     console.log(date);
+          // create a row for each object in the data
+          var rows = tbody.selectAll('tr')
+              .data(newData)
+          rows.exit()
+             //  .transition()
+             //  .duration(1000)
+              //   .attr("width", 0)
+              .remove();
+          rows.enter()
+              .append('tr')
+              .merge(rows)
+              .style('background-color', Color)
+              .attr('class', "tab")
+           //   .attr('id',fillId)
 
-/!*          let date=[];
-          let si = false;
-          for (let k=0; k<14; k++){
-            for (let i=0; i<data.length; i++){
-              if(date.includes(data[i].Timestamp == si)){
-                var u = d3.entries(data[i]).map( function (d){
-                  const entries = d3.values(d)
-                  return {
-                    Timestamp: entries["1"].Timestamp,
-                    Luogo: entries["1"],
-                    Prezzo: entries["1"],
-                    Nome: entries["1"],
-                    Cognome: entries["1"],
-                  };
+          //    .style('opacity', "0.6");
+          // create a cell in each row for each column
+          var cells = rows.selectAll('td')
+              .data(function (row) {
+                return columns.map(function (column) {
+                  return {column: column, value: row.key + ":  " + row.value.total};
                 });
-              }
-              date=[];
-              date.push(u);
+              })
+
+        cells.enter()
+           .append('td')
+             .merge(cells)
+              // .style('background-color', Color)
+              // .style('opacity', "0.6")
+              .text(function (d) {
+                return d.value;
+              })
+          rows.on('click', function(){
+            var text = d3.select(this);
+            var name= text.data()[0].key
+            patterns(data1, name)
+          })
+      //  .on('click', patterns)
+          function Color(d) {
+            if (d.value.total > 2000) {
+              return "rgba(255,000,000, 0.3)";
+            }
+          /*  function fillId(d){
+              let B = d3.nest()
+                  .key(function (d) {
+                    return d.id
+                  })
+                  .entries(d);
+              return B[0].key
+            }*/
+          }
+        }
+/*        function patterns(d){
+          console.log(d)
+         /!* var dat = d3.nest()
+              .key(function (d) {
+                return d.Nome;
+              })
+              .rollup(function (v) {
+                return {
+                  total: d3.sum(v, function (d) {
+                    return d.Prezzo;
+                  }),
+                };
+              })
+              .key(function (d) {
+                return d.Luogo;
+              })
+              .sortKeys(d3.ascending)
+              .rollup(function (v) {
+                return {
+                  total: d3.sum(v, function (d) {
+                    return d.Prezzo;
+                  }),
+                };
+              })
+              .entries(data);
+          console.log(dat)*!/
+         /!* let newData = [];
+          for (let i = 0; i < dat.length; i++) {
+            if (dat[i].value.total > 150 || dat[i].value.total) {
+              newData.push(dat[i])
             }
           }
-       // console.log(date);
-          let time=[]
-          for (let i=0; i<data.length; i++){
-            let a =data[i].Timestamp
-            if (time.includes(a)==false){
-              time.push(a)
-            }
-          }
-
-          let dates=[]
-          for (let i=0; i<data.length; i++){
-            let a =data[i].Timestamp
-
-            if (dates.length == 0) {
-              dates.push(a)
-              dates.push(data[i].)
-            }
-            else if(dates.includes(a)== false){
-              dates.push(a)
-            }
-
-          }*!/
-     //   console.log(data)
-     //   console.log(subgroups);
-        var stackedData = d3.stack()
-              .keys(subg)
-      var stacked = stackedData(tot1)
-    //  console.log(stacked)
-      // ----------------
-      // Highlight a specific subgroup when hovered
-      // ----------------
-
-      // What happens when user hover a bar
-      var mouseover = function() {
-        // what subgroup are we hovering?
-        var subgroupName = d3.select(this.parentNode).datum().key; // This was the tricky part
-
-      //  var subgroupValue = d.data[subgroupName];
-        // Reduce opacity of all rect to 0.2
-        d3.selectAll(".myRect").style("opacity", 0.2)
-        // Highlight all rects of this subgroup with opacity 0.8. It is possible to select them since they have a specific class = their name.
-        d3.selectAll("."+subgroupName)
-            .style("opacity", 1)
+          console.log(newData)*!/
+          var u = svg2.selectAll("rect")
+              .data(d)
+          u.append("rect")
+        }*/
       }
+    }
 
-      // When user do not hover anymore
-      var mouseleave = function() {
-        // Back to normal opacity: 0.8
-        d3.selectAll(".myRect")
-            .style("opacity",0.8)
-      }
-
-      // Show the bars
-      svg1.append("g")
-          .selectAll("g")
-          // Enter in the stack data = loop key per key = group per group
-          .data(stacked)
-          .enter().append("g")
-          .attr("fill", function(d) { return color(d.key); })
-          .attr("class", function(d){ return "myRect " + d.key }) // Add a class to each subgroup: their name
-          .selectAll("rect")
-          // enter a second time = loop subgroup per subgroup to add all rectangles
-          .data(function(d) { return d; })
-          .enter().append("rect")
-          .attr("x", function(d) { return x(d.data.group); })
-          .attr("y", function(d) { return y(d[1]); })
-          .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-          .attr("width",x.bandwidth())
-          .attr("stroke", "grey")
-          .on("mouseover", mouseover)
-          .on("mouseleave", mouseleave)
-         // console.log(y)
-
-    })*/
-   // Grafico 3
-    /*var margin = {top: 20, right: 30, bottom: 40, left: 90},
-        width = 460 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-     svg = d3.select("#EmplTitle")
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
-    let EType = []
-    let ETitle = []
-// Parse the Data
-    d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/car-assignments.csv").then(function(data) {
-      for (let i = 0; i < data.length; i++) {
-        let type = data[i].CurrentEmploymentType;
-        let title = data[i].CurrentEmploymentTitle;
-        EType.push(type)
-        ETitle.push(title)
-      }
-      let EmplType = {};
-      let EmplTitle= {}
-      for ( let i =0; i < EType.length ; i++ ){
-        EmplType[ EType[i] ] = typeof EmplType[ EType[i] ]  === 'undefined' ? 1 : ++EmplType[ EType[i] ];
-      }
-      for ( let i =0; i < ETitle.length ; i++ ){
-        EmplTitle[ ETitle[i] ] = typeof EmplTitle[ ETitle[i] ]  === 'undefined' ? 1 : ++EmplTitle[ ETitle[i] ];
-      }
-
-      let  A = d3.entries(EmplType);
-      //let B =d3.entries(EmplTitle)
-      // Add X axis
-      var x = d3.scaleLinear()
-          .domain([0, width/10])
-          .range([ 0, width]);
-      svg.append("g")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(x))
-          .selectAll("text")
-          .attr("transform", "translate(-10,0)rotate(-45)")
-          .style("text-anchor", "end");
-
-      // Y axis
-      var y = d3.scaleBand()
-          .range([ 0, height ])
-          .domain(A.map(function(d) { return d.key; }))
-          .padding(.1);
-      svg.append("g")
-          .call(d3.axisLeft(y))
-
-      //Bars
-      const b = svg
-          .selectAll("myRect")
-          .data(A)
-          .enter()
-          .append("rect")
-          //  .text(function(d) { return d.value; })
-          .attr("x", x(0) )
-          .attr("y", function(d) { return y(d.key); })
-          .attr("width", function(d) {return 10*d.value;})
-          .attr("height", y.bandwidth() )
-          .attr("fill", "#69b3a2")
-      b
-          .append("text")
-          .attr("fill", "#69b3a2")
-          .attr("x", 0)
-          .attr("y", 50)
-          .attr("height", y.bandwidth() )
-          .attr("dy", "0.35em")
-          .text(function(d) { return d.value});
-
-      // .attr("x", function(d) { return x(d.value); })
-      // .attr("y", function(d) { return y(d.key); })
-      // .attr("width", x.bandwidth())
-      // .attr("height", function(d) { return height - y(d.value); })
-      // .attr("fill", "#69b3a2")
-
-    })
-    let mov = d3.select("#movement")
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
-    let B=[]
-    d3.csv("https://raw.githubusercontent.com/FranceMeli/Mini-Challege2/master/static/gps.csv").then(function(data) {
-      for (let i = 0; i < data.length; i++) {
-        let type = data[i].id;
-        B.push(type)
-      }
-      let Move = {};
-      for ( let i =0; i < B.length ; i++ ){
-        Move[ B[i] ] = typeof Move[ B[i] ]  === 'undefined' ? 1 : ++Move[ B[i] ];
-      }
-      let C =d3.entries(Move)
-
-      var x = d3.scaleLinear()
-          .domain([0, width*100])
-          .range([ 0, width]);
-      mov.append("g")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(x))
-          .selectAll("text")
-          .attr("transform", "translate(-10,0)rotate(-45)")
-          .style("text-anchor", "end");
-
-      // Y axis
-      var y = d3.scaleBand()
-          .range([ 0, height ])
-          .domain(C.map(function(d) { return d.key; }))
-          .padding(.1);
-      mov.append("g")
-          .call(d3.axisLeft(y))
-
-      //Bars
-      const b = mov
-          .selectAll("myRect")
-          .data(C)
-          .enter()
-          .append("rect")
-          //  .text(function(d) { return d.value; })
-          .attr("x", x(0) )
-          .attr("y", function(d) { return y(d.key); })
-          .attr("width", function(d) {return d.value/100;})
-          .attr("height", y.bandwidth() )
-          .attr("fill", "#69b3a2")
-      b
-          .append("text")
-          .attr("fill", "#69b3a2")
-          .attr("x", 0)
-          .attr("y", 50)
-          .attr("height", y.bandwidth() )
-          .attr("dy", "0.35em")
-          .text(function(d) { return d.value});
-    }) */
-    //Grafico 4
-    // Parse the Data
-}
 }
 </script>
 
@@ -543,6 +538,22 @@ export default {
 <style scoped>
 h3 {
   margin: 40px 0 0;
+}
+#spese {
+  width:68%;
+  display: inline-block;
+}
+#appunti {
+  width:32%;
+  display: inline-block;
+  float: right;
+}
+#luogo {
+  width:50%;
+  display: inline-block;
+}
+button:hover {
+  background-color: #3e8e41;
 }
 ul {
   list-style-type: none;
