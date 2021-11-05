@@ -6,14 +6,11 @@
       <div id="EmplType">Suddivisioni dei ruoli dei dipendenti dell'azienda</div>
       <div id="EmplTitle"></div>
     </div>
-<!--   <MC2Vehicles id="v"></MC2Vehicles>
-    <MC2Card id="c"></MC2Card>-->
-    </div>
-  </template>
+  </div>
+</template>
 
   <script>
   const d3 = require("d3");
-
   export default {
     name: 'Home',
     methods: {
@@ -270,12 +267,6 @@
 </script>
 
   <style>
-  #v {
-    display: none;
-  }
-  #c {
-    display: none;
-  }
   #table {
     font-family: Arial, Helvetica, sans-serif;
     width: 100%;
@@ -308,13 +299,5 @@
     display: inline-block;
     overflow: scroll;
     height: 410px;
-  }
-  #app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    /*color: #2c3e50;*/
-    margin-top: 60px;
   }
   </style>

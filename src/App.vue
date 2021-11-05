@@ -8,7 +8,6 @@
       <b-collapse id="nav-collapse" is-nav >
         <b-navbar-nav>
           <b-nav-item href="#" @click="selezionato='Home'">Home</b-nav-item>
-     <!-- <b-nav-item href="#" @click="CambiaPagina(">General Results</b-nav-item> -->
           <b-nav-item href="#" @click="selezionato='Vehicles'">Vehicles</b-nav-item>
           <b-nav-item href="#" @click="selezionato='Card'">Credit-Cards</b-nav-item>
         </b-navbar-nav>
@@ -21,7 +20,7 @@
   </template>
 
   <script>
-  const d3 = require("d3");
+  //const d3 = require("d3");
   import MC2Vehicles from './components/MC2Vehicles.vue'
   import MC2Card from "@/components/MC2Card";
   import Home from "@/components/Home";
@@ -41,7 +40,7 @@ return {
     methods: {
     },
     mounted: function () {
-  //GraficoPie Chart
+/*  //GraficoPie Chart
       var width = 400
       var height = 400
       var margin = 20
@@ -119,7 +118,7 @@ return {
           });
 
   // Grafico 3
-/*  var margin1 = {top: 20, right: 30, bottom: 40, left: 90},
+/!*  var margin1 = {top: 20, right: 30, bottom: 40, left: 90},
       width1 = 460 - margin1.left - margin1.right,
       height1 = 400 - margin1.top - margin1.bottom;
 // append the svg object to the body of the page
@@ -130,7 +129,7 @@ return {
       .append("g")
       .attr("transform", "translate(" + margin1.left + "," + margin1.top + ")");*!/
   let EType = []
-  let ETitle = []*/
+  let ETitle = []*!/
 // Parse the Data
   d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/car-assignments.csv")
     //  .then(function(data) {
@@ -158,15 +157,15 @@ return {
                 }
               });
        let dataset = ids;
-/*
+/!*
         var nested = d3.nest()
             .key(function(d) { return d.Type; })
             .key(function(d) { return d.Title; })
             .rollup(function(leaves) { return leaves.length; })
             .entries(dataset);
-*/
+*!/
         tabulate(dataset, ['Employer','Id', 'Title','Car']); // 2 column table
-   /* for (let i = 0; i < dataset.length; i++) {
+   /!* for (let i = 0; i < dataset.length; i++) {
       let type = dataset[i].Type;
       let title = dataset[i].Title;
       EType.push(type)
@@ -180,12 +179,12 @@ return {
     for ( let i =0; i < ETitle.length ; i++ ){
       EmplTitle[ ETitle[i] ] = typeof EmplTitle[ ETitle[i] ]  === 'undefined' ? 1 : ++EmplTitle[ ETitle[i] ];
     }
-    let  A = d3.entries(EmplType);*/
+    let  A = d3.entries(EmplType);*!/
     //let B =d3.entries(EmplTitle)
     // Add X axis
 
 
-  /*  var x = d3.scaleLinear()
+  /!*  var x = d3.scaleLinear()
         .domain([0, width1/10])
         .range([ 0, width1]);
     svg1.append("g")
@@ -221,7 +220,7 @@ return {
         .attr("y", 50)
         .attr("height", y.bandwidth() )
         .attr("dy", "0.35em")
-        .text(function(d) { return d.value});*/
+        .text(function(d) { return d.value});*!/
 
     // .attr("x", function(d) { return x(d.value); })
     // .attr("y", function(d) { return y(d.key); })
@@ -284,7 +283,7 @@ return {
             return "rgba(255,000,000, 0.3)";
           }
         }
-      }
+      }*/
 // render the tables
   }
 

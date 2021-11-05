@@ -3,38 +3,98 @@
     <h1>MC2Vehicles</h1>
     <b-row>
       <b-col>
-        <div id="Map"></div>
-        <div>
-          <label>
-            Seleziona una data compresa tra il 06/01/2014 e il 19/01/2014:
-          <input id="calendar" type="date" name="data" min="2014-01-06" max="2014-01-19" step="1" required>
-          <span class="validity"></span>
-          </label>
+        <div class="mt-3">
+          <b-button-group>
+            <b-button href="#" @click="selection='Map'">Map</b-button>
+<!--            <b-button href="#" @click="selection='Timeline'">Timeline</b-button>-->
+            <b-button href="#" @click="selection='TableMove'">Table of movement</b-button>
+          </b-button-group>
         </div>
-        <div id="vis">
-        <button id="b1" type="button" class="btn btn-info">Play</button>
-        </div>
+
+      <component :is="selection" :checkedNames="checkedNames"></component>
       </b-col>
+      <!-- Secondo me conviene fare 3 componenti 1 per la mappa, uno per la timeline e uno per la tabella -->
       <b-col>
         <h2>Persons</h2>
-        <div id="persons"></div>
+<!--        <b-list-group class="personList">
+          <b-list-group-item v-for="pers in persons" :key="pers.Employer"
+                             :variant="pers.selected ? 'warning': ''"
+                             :id=pers.Employer
+                             @click="ID=pers.Id"
+                             :value="ID"
+                             class="d-flex justify-content-between align-items-center" >
+            <b-badge variant="primary" pill>{{pers.Id}}</b-badge>
+            {{pers.Employer}}, {{counter}}, {{ID}}
+          </b-list-group-item>
+        </b-list-group>-->
+        <div id="v-model-multiple-checkboxes">
+          <b-row>
+            <b-col>
+              <div v-for="pers in p1" :key="pers.Employer" class="pcol">
+                <input type="checkbox" class="checkbox" :id="pers.Id" :value="pers.Employer" v-model="checkedNames"
+                       :disabled="checkedNames.length > 0 && checkedNames.indexOf(pers.Employer) === -1"/>  <!-- indexOf mi permette di poter deselezionare l'elemento selezionato perchè il disable non è attivo su di lui -->
+                <label>{{pers.Employer}}</label>
+
+              </div>
+            </b-col>
+            <b-col>
+              <div v-for="pers in p2" :key="pers.Employer" class="pcol" >
+                <input type="checkbox" class="checkbox" :id="pers.Id" :value="pers.Employer" v-model="checkedNames"
+                       :disabled="checkedNames.length > 0 && checkedNames.indexOf(pers.Employer) === -1"/>
+                <label>{{pers.Employer}}</label>
+              </div>
+            </b-col>
+          </b-row>
+<!--          <div v-for="pers in persons" :key="pers.Employer">
+            <input type="checkbox" class="checkbox" :id="pers.Id" :value="pers.Employer" v-model="checkedNames"/>
+            <label>{{pers.Employer}}</label>
+          </div>-->
+          <br />
+          <span>Checked names: <b>{{ checkedNames}}</b></span>
+          <br/>
+          <button id="button">Check</button>
+        </div>
       </b-col>
+<!--      <b-form-group label="Using sub-components:" v-slot="{ ariaDescribedby }">
+        <b-form-checkbox-group id="checkbox-group-2" :aria-describedby="ariaDescribedby" name="flavour-2">
+          <b-form-checkbox v-for="pers in persons" v-model="selected" :id="pers.Id" :value="pers.Id" :key="pers.Employer">
+            <label>{{ selected }}</label>{{pers.Employer}}</b-form-checkbox>
+        </b-form-checkbox-group>
+      </b-form-group>-->
+
     </b-row>
 
   </div>
 </template>
 
 <script>
+import Map from './Map.vue'
+/*import Timeline from "./Timeline.vue"*/
+import TableMove from "./TableMove.vue";
+
 const d3 = require("d3");
-const topojson = require("topojson")
+//const topojson = require("topojson")
 export default {
   name: 'MC2Vehicles',
+  components: {
+    'Map': Map,
+    /*'Timeline': Timeline,*/
+    'TableMove': TableMove
+  },
   data() {
     return {
-      persons: []
+      selection: 'Map',
+      persons: [],
+      p1: [],
+      p2: [],
+      counter: 0,
+      checkedNames: []
     };
   },
+  computed: {
+  },
   mounted: function () {
+
     d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/car-assignments.csv")
         //  .then(function(data) {
         .then((rows) => {
@@ -45,11 +105,32 @@ export default {
                   Employer: entries["1"] + " " + entries["0"],
                   Id: entries["2"],
                 }
-              });
-          let dataset = ids;
-          tabulate(dataset, ['Employer', 'Id']); // 2 column table
+              })
+          this.persons = ids
+          let p1 = []
+          let p2 = []
+          for (let i = 0; i < this.persons.length; i = i + 1){
+            if (this.persons[i].Id < 23 && this.persons[i].Id!=""){
+              p1.push(this.persons[i])
+            }
+            else {
+              p2.push(this.persons[i])
+            }
+          }
+          this.p1=p1
+          this.p2=p2
+        //  tabulate(dataset, ['Employer', 'Id']); // 2 column table
         })
-    function tabulate(data, columns) {
+    let id;
+    d3.select("#button").on("click", function() {
+      var boxes = d3.selectAll("input.checkbox:checked");
+      boxes.each(function() {
+        console.log(this.value)
+        id=this.id
+      })
+      console.log(id)
+    });
+/*    function tabulate(data, columns) {
       var table = d3.select('#persons')
           .append('table')
           .attr("id", "table")
@@ -84,8 +165,8 @@ export default {
           // .style('opacity', "0.6")
           .text(function (d) { return d.value; });
       return table;
-    }
-    var width = 900;
+    }*/
+   /* var width = 900;
     var height = 600;
     var inputGiorno = null;
     let features;
@@ -105,17 +186,17 @@ export default {
     //  var person = d3.select(".list-group personList")
     function createMap(features) {
       var geoPath = d3.geoPath().projection(projection);
-      /* var bounds = d3.geoBounds(features);
+      /!* var bounds = d3.geoBounds(features);
         var centerX = d3.sum(bounds, function(d) {return d[0];}) / 2;
-        var centerY = d3.sum(bounds, function(d) {return d[1];}) / 2;*/
+        var centerY = d3.sum(bounds, function(d) {return d[1];}) / 2;*!/
       svg.selectAll("path").data(features.features)
           .enter()
           .append("path")
           .attr("d", geoPath)
     }
     var margin = {top:50, right:50, bottom:0, left:50},
-        width1 = 960 - margin.left - margin.right,
-        height1 = 500 - margin.top - margin.bottom;
+        width1 = 800,
+        height1 = 250;
     var svg1 = d3.select("#vis")
         .append("svg")
         .attr("width", width1 + margin.left + margin.right)
@@ -123,6 +204,7 @@ export default {
     var moving = false;
     var timer=null;
     var currentValue = 0;
+
     var targetValue = width1;
     var playButton = d3.select("#b1");
     var x = d3.scaleLinear() //d3.scaleTime()
@@ -141,7 +223,7 @@ export default {
         .attr("class", "track-inset")
         .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
         .attr("class", "track-overlay")
-      /*  .call(d3.drag()
+      /!*  .call(d3.drag()
             .on("start.interrupt", function() { slider.interrupt(); })
             .on("start drag", function(evt,value) {
               var pos = d3.select('#slider').text(value[ 0 ]);
@@ -149,7 +231,7 @@ export default {
               handle.attr("cx", x(currentValue));
           //    update(x.invert(currentValue));
             })
-        );*/
+        );*!/
     var handle = slider.insert("circle", ".track-overlay")
         .attr("class", "handle")
         .attr("r", 9);
@@ -159,16 +241,26 @@ export default {
         .attr("text-anchor", "middle")
         .text("A")
         .attr("transform", "translate(0," + (-25) + ")")
-let time=0;
+let time=0
+    let id;
     d3.select("#calendar").on("input", function () {
       inputGiorno = this.value
+    });
+    d3.select("#button").on("click", function() {
+      var boxes = d3.selectAll("input.checkbox:checked");
+      boxes.each(function() {
+        id=this.id
+      })
     });
     let gg;
     playButton
         .on("click", function() {
+          console.log(id)
+         let ID=id
           let giorno= inputGiorno.slice(5,7) + "-" + inputGiorno.slice(8,10) + "-" + inputGiorno.slice(0,4)
            gg= inputGiorno.slice(5,7) + "/" + inputGiorno.slice(8,10) + "/" + inputGiorno.slice(0,4)
           let riprova = []
+          let dataId=[]
           let trajs=[]
           d3.csv("https://raw.githubusercontent.com/FranceMeli/progetto-minichallenges/master/static/GpsForDate/" + giorno + ".csv")
               .then((rows) => {
@@ -187,17 +279,35 @@ let time=0;
                 let dataset = [];
                 dataset = ids;
                 for (let i = 0; i < dataset.length; i = i + 3) {
-                  let secondi = trasformaOra(dataset[i].Timestamp.slice(11,));
-                  dataset[i].times = secondi
-                  dataset[i]["Timestamp"] = dataset[i].Timestamp.slice(0, 10)
-                  dataset[i]["time"]= dataset[i].time.slice(11,)
-                  riprova.push(dataset[i])
+                  if (ID!= undefined) {
+                    if (dataset[i].id == ID) {
+                      let secondi = trasformaOra(dataset[i].Timestamp.slice(11,));
+                      dataset[i].times = secondi
+                      dataset[i]["Timestamp"] = dataset[i].Timestamp.slice(0, 10)
+                      dataset[i]["time"] = dataset[i].time.slice(11,)
+                      dataId.push(dataset[i])
+                    }
+                  }
+                  else {
+                    let secondi = trasformaOra(dataset[i].Timestamp.slice(11,));
+                    dataset[i].times = secondi
+                    dataset[i]["Timestamp"] = dataset[i].Timestamp.slice(0, 10)
+                    dataset[i]["time"] = dataset[i].time.slice(11,)
+                    riprova.push(dataset[i])
+                  }
                 }
-                trajs = d3.nest()
-                    .key(d => d.id)
-                    .entries(riprova);
-        /*  playButton
-              .on("click", function () {*/
+                if(ID!=undefined){
+                  trajs = d3.nest()
+                      .key(d => d.id)
+                      .entries(dataId);
+                }
+                else {
+                  trajs = d3.nest()
+                      .key(d => d.id)
+                      .entries(riprova);
+                }
+        /!*  playButton
+              .on("click", function () {*!/
                 var button = d3.select(this);
                 if (button.text() == "Play") {
                   moving = true;
@@ -215,9 +325,9 @@ let time=0;
                 currentValue= FirstHour(trajs)
                 var t = LastHour(trajs)
                 targetValue = t*860/86400
+                console.log(trajs)
                 console.log("Slider moving: " + moving);
               })
-
           function step() {
            time=currentValue*860/86400
             if (time > targetValue) {
@@ -253,9 +363,9 @@ let time=0;
     }
 
     function update(h,d) {
-      /*var myColor = d3.scaleLinear().domain([0,35])
+      /!*var myColor = d3.scaleLinear().domain([0,35])
            //  .range(["red", gold", "blue", "green", "yellow", "black", "grey", "darkgreen", "pink", "brown", "slateblue", "grey1", "orange"])
-            .range(["red", "black"])*/
+            .range(["red", "black"])*!/
       svg
           .selectAll("circle")
           .data(d.map(function(d) {
@@ -395,7 +505,7 @@ let time=0;
       let tot = hours + ":" + minutes + ":" + seconds;
       return tot
 
-    }
+    }*/
 
     /*function createTraj(gps){
       var myColor = d3.scaleOrdinal().domain(gps)
@@ -513,23 +623,27 @@ let time=0;
         }
       }
     }*/
+  },
+  methods: {
+    OttieniId(){
+      console.log(this.ID)
+      let f= this.ID;
+      return f;
+    }
 
+  },
 
-  }
 }</script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
 h3 {
   margin: 40px 0 0;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+.pcol{
+  text-align: left;
+
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
+
 a {
   fill: #ccc;
   stroke: #fff;
@@ -570,10 +684,7 @@ input:valid+span::after {
   content: '✓';
 }
 
-#play-button {
-  position: absolute;
-  top: 140px;
-  left: 50px;
+#b1 {
   background: #f08080;
   padding-right: 26px;
   border-radius: 3px;
@@ -584,6 +695,33 @@ input:valid+span::after {
   width: 60px;
   cursor: pointer;
   height: 30px;
+}
+input[type=checkbox] {
+  padding-left:5px;
+  margin-right:5px;
+  border-radius:15px;
+
+  -webkit-appearance:button;
+
+  border: double 2px #00F;
+
+  background-color:#0b0095;
+  color:#FFF;
+  white-space: nowrap;
+  overflow:hidden;
+
+  width:15px;
+  height:15px;
+}
+
+input[type=checkbox]:checked {
+  background-color:#000;
+  border-left-color:#06F;
+  border-right-color:#06F;
+}
+
+input[type=checkbox]:hover {
+  box-shadow:0px 0px 10px #1300ff;
 }
 
 #play-button:hover {
