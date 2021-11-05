@@ -1,4 +1,4 @@
-# riprovo
+# Progetto per esame di Visual Analytics. Progetto ancora in corso
 
 ## Project setup
 ```
