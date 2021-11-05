@@ -1,4 +1,4 @@
-# Progetto per esame di Visual Analytics...ancora in corso
+# Progetto per esame di Visual Analytics. Progetto ancora in corso
 
 ## Project setup
 ```
